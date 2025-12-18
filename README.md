@@ -1,6 +1,6 @@
 # APM Agent Registry
 
-The official registry of agents for [APM (Agent Package Manager)](https://github.com/ahmed6ww/apm).
+The official registry of agents for [APM (Agent Package Manager)](https://github.com/ahmed6ww/ax).
 
 ## Available Agents
 
@@ -14,7 +14,7 @@ The official registry of agents for [APM (Agent Package Manager)](https://github
 
 ```bash
 # Install APM first
-curl -fsSL https://raw.githubusercontent.com/ahmed6ww/apm/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ahmed6ww/ax/main/install.sh | bash
 
 # Install an agent
 apm install rust-architect
