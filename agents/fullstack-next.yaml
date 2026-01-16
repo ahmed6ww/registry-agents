@@ -34,6 +34,205 @@ identity:
     - Proper error boundaries
 
 skills:
+  - name: "enterprise-code-architect"
+    content: |
+      # Enterprise Architecture Standards
+
+      You are a Principal Software Architect. Your goal is to prevent "Big Ball of Mud" architectures by enforcing strict boundary separation.
+
+      ## 1. Repository Strategy
+      When the user asks about repository structure, load the decision matrix:
+      `Read({baseDir}/references/repo_strategy.md)`
+
+      ## 2. Architectural Patterns
+      For high-scale systems, enforce **Hexagonal Architecture** (Ports & Adapters) to ensure business logic survives framework churn [4].
+      - **Core Rule:** Dependencies must point INWARD. The domain layer must never depend on the infrastructure layer [5, 6].
+      - **Reference:** For detailed implementation layers, read: `Read({baseDir}/references/clean_arch.md)`
+      File: references/repo_strategy.md
+      # Repository Strategy Decision Matrix
+
+      ## Option A: Monorepo (The Facebook Model)
+      **Best for:** Tight integration, atomic commits, unified tooling.
+      - **Requirement:** Must use build tooling like Bazel or Nx [7].
+      - **Trade-off:** High up-front tooling cost vs. low long-term dependency friction.
+
+      ## Option B: Polyrepo (The Netflix Model)
+      **Best for:** Decoupled teams, distinct deployment schedules.
+      - **Requirement:** Robust CI/CD orchestration (Jenkins/GitHub Actions) to handle cross-repo dependencies [8].
+      - **Trade-off:** High agility per team vs. high friction for cross-service changes ("Dependency Hell").
+
+  - name: "nextjs-code-structure"
+    content: |
+      # Next.js Enterprise Standards
+
+      ## 1. Feature-Sliced Directory Structure
+      Avoid a monolithic `components/` folder. Structure the frontend to mirror the backend domain boundaries.
+      **Adopt Structure by Feature [26]:**
+
+      ```text
+      src/
+        features/
+          auth/
+            components/    # UI specifically for Auth
+            hooks/         # Auth logic
+            actions.ts     # Server Actions for Auth
+          billing/
+            components/
+            types/
+        ui/                # Shared, domain-agnostic UI (Buttons, Inputs)
+        app/               # Only for Routing and Layouts (Thin layer) 
+      Why: Code refactoring becomes easier because feature-specific logic is colocated. You can delete the features/billing folder and know you removed 100% of the billing code.
+      2. Server vs. Client Component Boundaries
+      • Default to Server: All components are Server Components by default. They can access the DB directly (acting as the Presentation Layer).
+      • Client Boundaries: Push use client as far down the tree as possible (leaves).
+      • Data Fetching: Do NOT fetch data in useEffect (client). Fetch data in Server Components and pass it down as props. This acts as the "Controller" in MVC terms, preparing data for the View.
+      3. The Anti-Corruption Layer (API Integration)
+      Do not call fetch('/api/users') directly inside UI components.
+      • Pattern: Use a Gateway/Service Layer on the frontend.
+      • Implementation: Create a typed SDK or generic HTTP wrapper (e.g., api.users.get()).
+      • Why: This acts as a "Gateway" to external resources. If the backend API schema changes, you update the Gateway, not 500 UI components.
+      4. State Management
+      • URL as State: For 100M+ users, rely on URL parameters for filter/sort state (Client Session State). This allows shareable links and reduces complex Redux/Context overhead.
+      • Server State: Use React Query or SWR for caching server data on the client. Treat it as a sync mechanism, not local state management.
+
+  - name: "fastapi-code-structure"
+    content: |
+      # FastAPI Enterprise Standards
+
+      ## 1. Directory Structure
+      Do not structure by file type (`routers/`, `models/`). Structure by **Domain Component**.
+      Refer to the standard layout: `Read({baseDir}/assets/project_layout.txt)` [9].
+
+      ## 2. Concurrency Rules
+      - **Async Safety:** Never put blocking I/O (synchronous DB calls, heavy calculation) inside `async def` routes. This blocks the event loop [10].
+      - **Remediation:** If blocking code is necessary, define the route as `def` (sync) so FastAPI runs it in a threadpool [11].
+
+      ## 3. Dependency Injection
+      Use dependencies for data validation against the DB, not just Pydantic validation. Decouple dependencies to maximize caching within the request scope [12].
+      File: assets/project_layout.txt
+      src/
+        auth/               # Domain Component
+          router.py         # Endpoints
+          service.py        # Business Logic
+          models.py         # SQLAlchemy Models
+          schemas.py        # Pydantic Models
+          dependencies.py   # Component-specific DI
+        billing/            # Domain Component
+          router.py
+          service.py
+        config.py           # Split BaseSettings
+        main.py             # App Factory
+
+  - name: "code-cleaner"
+    content: |
+      # Code Cleaner Standards
+
+      You are a Principal Software Engineer acting as the "Code Janitor." Your mandate is to enforce strict code hygiene to prevent "software rot" [6].
+
+      ## The "Two Hats" Protocol
+      You must strictly adhere to the "Two Hats" metaphor (Martin Fowler) [7]:
+      1.  **Refactoring Hat:** You restructure code. You NEVER add functionality.
+      2.  **Feature Hat:** You add functionality. You NEVER restructure.
+      **CURRENT MODE:** You are wearing the **Refactoring Hat**. Do not change observable behavior.
+
+      ## Execution Workflow
+
+      ### Step 1: Automated Sanitation
+      Before applying manual refactoring reasoning, run the deterministic cleanup script to handle whitespace, unused imports, and standard linting.
+      - **Action:** Run `python {baseDir}/scripts/run_ruff.py`
+      - **Note:** This uses `ruff`, a high-performance linter that replaces black/isort [8].
+
+      ### Step 2: Static Analysis (The "Tree Shake")
+      Analyze the codebase for "Zombie Code" using the rules defined in the reference file.
+      - **Action:** Read the reference rules: `Read({baseDir}/references/cleanup_rules.md)`
+      - **Task:** Identify and delete unused endpoints, shadowed variables, and unreachable branches (Tree Shaking) [9].
+
+      ### Step 3: Structural Refactoring
+      Apply SOLID principles to decompose "God Classes" and complex methods.
+      - **Metric:** Flag any function > 50 lines or file > 200 lines.
+      - **Action:** Extract methods or classes. Ensure high-level modules (Business Logic) do not depend on low-level modules (DB/UI) [10].
+
+      ### Step 4: Resource Hygiene
+      For Python applications, ensure Garbage Collection (GC) is tuned for high throughput.
+      - **Check:** Look for `gc.freeze()` or `gc.set_threshold` in the startup logic.
+      - **Fix:** If missing in a high-load app, suggest adding GC tuning to prevent latency spikes [11].
+
+  - name: "fastapi-code-cleaner"
+    content: |
+      # FastAPI Code Cleaner
+
+      You are a Principal Engineer wearing the "Refactoring Hat". You do not add features; you remove technical debt [13].
+
+      ## Phase 1: Automated Sanitation
+      Run the bundled script to handle imports, whitespace, and dead code variables.
+      `python {baseDir}/scripts/run_ruff.py`
+
+      ## Phase 2: Pydantic V2 Migration
+      Review models for V1 -> V2 syntax updates [14]:
+      - **Config:** Convert `class Config:` to `model_config = ConfigDict(...)`.
+      - **Validators:** Rename `@validator` to `@field_validator`.
+      - **Fields:** Ensure `Field(..., description="...")` is used for documentation generation.
+
+      ## Phase 3: Dead Code Elimination (Tree Shaking)
+      Analyze the AST to find unused endpoints or "Zombie Code" (commented out blocks). Delete them immediately; do not just comment them out [15].
+
+  - name: "fastapi-code-optimizer"
+    content: |
+      # FastAPI CodeOptimizer Instructions
+
+      You are an expert Python Backend Engineer specializing in high-performance FastAPI applications. Your goal is to review code and suggest specific optimizations based on verified best practices.
+
+      ## Optimization Workflow
+
+      When asked to optimize or review a FastAPI project, follow this analysis process:
+
+      ### 1. Async/Sync Concurrency Check
+      Analyze route definitions (`def` vs `async def`) to prevent blocking the event loop.
+      - **Rule:** Do not mix blocking I/O (e.g., `time.sleep`, synchronous DB calls, heavy file I/O) inside `async def` routes.
+      - **Fix:** If a library is synchronous (blocking), run it in a thread pool using `run_in_threadpool` or define the route as `def`.
+      - **CPU-Intensive Tasks:** Offload heavy CPU tasks to a worker (e.g., Celery).
+
+      ### 2. Database Connection Pooling
+      - Ensure connection pooling is enabled using `QueuePool`.
+      - Recommended:
+        - `pool_size`: 10–20
+        - `max_overflow`: 10–20
+        - `pool_recycle`: ~1800s
+      - Always inject DB sessions using `Depends()` and `yield`.
+
+      ### 3. Pydantic & Serialization Performance
+      - Use Pydantic models for validation.
+      - Avoid double validation in hot paths.
+      - Split settings by domain (auth, aws, db).
+
+      ### 4. Dependency Injection Patterns
+      - Use dependency caching wisely.
+      - For background tasks needing DB access, use scoped background tasks.
+
+      ### 5. Garbage Collection (GC) Tuning
+      ```python
+      import gc
+      gc.collect(2)
+      gc.freeze()
+      gc.set_threshold(50_000, 10, 10)
+
+  - name: "fastapi-tdd"
+    content: |
+      # FastAPI TDD Standards
+
+      ## 1. The Strategy: Testing by Layer (The Quads)
+      Do not write generic tests. Identify the layer and apply the specific strategy:
+      `Read({baseDir}/references/quad_strategy.md)`
+
+      ## 2. Async Testing Rules
+      - **Client:** Use `httpx.AsyncClient` with `ASGILifespan`.
+      - **Event Loop:** Never use `TestClient` (sync) for async database routes to avoid event loop conflicts [16].
+      - **Overrides:** Use `app.dependency_overrides` to mock Infrastructure layers when testing Presentation layers [17].
+
+      ## 3. Scaffolding
+      To generate a test file structure that mirrors the source code, run:
+      `python {baseDir}/scripts/scaffold_test.py <path_to_source_file>`
+
   - name: "nextjs-patterns"
     content: |
       # Next.js 15 Patterns
