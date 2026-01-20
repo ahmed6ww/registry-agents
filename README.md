@@ -7,8 +7,22 @@ This registry serves as the central hub where developers from around the world s
 ## 🎯 Purpose
 
 - **Democratize Expert Knowledge**: Share specialized prompts and skillsets (e.g., "Senior Rust Engineer", "QA Specialist") so anyone can spin up an expert agent in seconds.
-- **Write Once, Run Anywhere**: Define an agent's behavior once in a universal YAML format, and let AX compile it for any supported environment.
+- **Write Once, Run Anywhere**: Define an agent's behavior once in a universal format, and let AX compile it for any supported environment.
 - **Community Driven**: A collaborative space to iterate on what makes a "good" agent.
+
+## 📦 Available Agents
+
+These agents are built on the **Agent Skill Standard**, offering rich, multi-file knowledge bases and deterministic scripts.
+
+| Agent | Version | Description |
+|-------|---------|-------------|
+| 🧹 [code-cleaner](code-cleaner/) | 1.0.0 | Refactor code to remove technical debt, eliminate dead code, and enforce SOLID principles without altering runtime behavior. |
+| 🏛️ [enterprise-code-architect](enterprise-code-architect/) | 2.0.0 | Expert guidance on system design, repository strategy (Monorepo vs Polyrepo), and architectural patterns (Hexagonal, Clean, Onion). |
+| 🐍 [fastapi-code-cleaner](fastapi-code-cleaner/) | 1.0.0 | Refactor and sanitize FastAPI codebases by removing dead code, enforcing Pydantic V2 standards, and running deterministic linters. |
+| 🚀 [fastapi-code-optimizer](fastapi-code-optimizer/) | - | Expert Python Backend Engineer specializing in high-performance FastAPI applications. |
+| 🏗️ [fastapi-code-structure](fastapi-code-structure/) | 2.0.0 | Enforce enterprise-grade project structure (Dispatch style), dependency injection patterns, and async concurrency rules. |
+| 🧪 [fastapi-tdd](fastapi-tdd/) | 1.0.0 | Expert guide for Test-Driven Development in FastAPI, focusing on the "Quads" strategy and async testing patterns. |
+| ⚛️ [nextjs-code-structure](nextjs-code-structure/) | 1.0.0 | Architect scalable Next.js applications using Feature-Sliced Design and Server Component patterns. |
 
 ## 🤝 How to Contribute
 
@@ -20,33 +34,29 @@ We welcome contributions from developers across the globe! Whether you've crafte
     Fork this repository and clone it to your local machine.
 
 2.  **Create Your Agent**
-    Add a new YAML file in the `agents/` directory (e.g., `agents/my-special-agent.yaml`).
+    Create a new directory for your agent (e.g., `my-special-agent/`).
+    Inside, create a `SKILL.md` file with the following frontmatter:
     
-    ```yaml
-    name: "my-special-agent"
-    version: "1.0.0"
-    identity:
-      system_prompt: "..."
-    skills:
-      - name: "my-skill"
-        content: "..."
+    ```markdown
+    ---
+    name: my-special-agent
+    description: Brief description of what your agent does.
+    version: 1.0.0
+    allowed-tools: "Read,Write" 
+    ---
+    
+    # Detailed Instructions
+    
+    Your agent's main prompt and instructions go here...
     ```
 
-3.  **Register It**
-    Add your agent's metadata to `registry.json` so the CLI can find it.
+3.  **Add Resources (Optional)**
+    You can add `scripts/` or `references/` folders inside your agent directory to provide specialized tools or knowledge base files.
 
 4.  **Submit a PR**
-    Open a Pull Request with your new agent. Once approved, it will be instantly available to all AX users via `ax install my-special-agent`.
+    Open a Pull Request with your new agent directory. Once approved, it will be instantly available to all AX users.
 
 For detailed schema documentation and strict guidelines, please read [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-## 📦 Available Agents
-
-| Agent | Description | Author |
-|-------|-------------|--------|
-| 🦀 [rust-architect](agents/rust-architect.yaml) | Senior Rust Systems Engineer optimized for Tokio & zero-cost abstractions | ahmed6ww |
-| ⚡ [fullstack-next](agents/fullstack-next.yaml) | Next.js 15 + FastAPI + ShadcnUI full-stack expert | ahmed6ww |
-| 🧪 [qa-testing-squad](agents/qa-testing-squad.yaml) | Playwright + Jest testing configuration specialist | ahmed6ww |
 
 ## License
 
